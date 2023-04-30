@@ -2,7 +2,9 @@ package com.nicele08.notifyme.controller;
 
 import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.service.RequestLimitService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/request-limits")
+@Tag(name = "Request Limits", description = "The Request Limits API")
 public class RequestLimitController {
 
     private final RequestLimitService requestLimitService;
 
-    @Autowired
     public RequestLimitController(RequestLimitService requestLimitService) {
         this.requestLimitService = requestLimitService;
     }
@@ -29,7 +31,7 @@ public class RequestLimitController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<RequestLimit> createRequestLimit(@RequestBody @Valid RequestLimit requestLimit) {
         RequestLimit createdRequestLimit = requestLimitService.saveRequestLimit(requestLimit);
 

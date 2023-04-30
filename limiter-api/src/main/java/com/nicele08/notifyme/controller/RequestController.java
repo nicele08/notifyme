@@ -2,7 +2,9 @@ package com.nicele08.notifyme.controller;
 
 import com.nicele08.notifyme.entity.Request;
 import com.nicele08.notifyme.service.RequestService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,16 +16,16 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/requests")
+@Tag(name = "Requests", description = "The Requests API")
 public class RequestController {
 
     private final RequestService requestService;
 
-    @Autowired
     public RequestController(RequestService requestService) {
         this.requestService = requestService;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<Request> createRequest(@RequestBody @Valid Request request) {
         Request createdRequest = requestService.createRequest(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRequest);

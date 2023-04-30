@@ -4,7 +4,6 @@ import com.nicele08.notifyme.entity.Request;
 import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.repository.RequestLimitRepository;
 import com.nicele08.notifyme.repository.RequestRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,11 +12,14 @@ import java.util.List;
 @Service
 public class RequestService {
 
-    @Autowired
-    private RequestRepository requestRepository;
+    private final RequestRepository requestRepository;
 
-    @Autowired
-    private RequestLimitRepository requestLimitRepository;
+    private final RequestLimitRepository requestLimitRepository;
+
+    public RequestService(RequestRepository requestRepository, RequestLimitRepository requestLimitRepository) {
+        this.requestRepository = requestRepository;
+        this.requestLimitRepository = requestLimitRepository;
+    }
 
     public Request createRequest(Request request) {
         Long clientId = request.getClient().getId();

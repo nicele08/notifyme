@@ -2,7 +2,9 @@ package com.nicele08.notifyme.controller;
 
 import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.service.MonthlyRequestLimitService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +15,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/monthly-limits")
+@Tag(name = "Monthly Limits", description = "The Monthly Limits API")
 public class MonthlyRequestLimitController {
 
     private final MonthlyRequestLimitService monthlyRequestLimitService;
 
-    @Autowired
     public MonthlyRequestLimitController(MonthlyRequestLimitService monthlyRequestLimitService) {
         this.monthlyRequestLimitService = monthlyRequestLimitService;
     }

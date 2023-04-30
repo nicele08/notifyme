@@ -2,7 +2,6 @@ package com.nicele08.notifyme.service;
 
 import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.repository.MonthlyRequestLimitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,7 +13,6 @@ public class MonthlyRequestLimitService {
 
     private final MonthlyRequestLimitRepository monthlyRequestLimitRepository;
 
-    @Autowired
     public MonthlyRequestLimitService(MonthlyRequestLimitRepository monthlyRequestLimitRepository) {
         this.monthlyRequestLimitRepository = monthlyRequestLimitRepository;
     }

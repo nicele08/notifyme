@@ -2,7 +2,6 @@ package com.nicele08.notifyme.service;
 
 import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.repository.RequestLimitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -12,7 +11,6 @@ public class RequestLimitService {
 
     private final RequestLimitRepository requestLimitRepository;
 
-    @Autowired
     public RequestLimitService(RequestLimitRepository requestLimitRepository) {
         this.requestLimitRepository = requestLimitRepository;
     }

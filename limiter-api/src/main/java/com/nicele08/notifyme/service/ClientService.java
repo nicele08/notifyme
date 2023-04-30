@@ -3,7 +3,6 @@ package com.nicele08.notifyme.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.nicele08.notifyme.entity.Client;
@@ -12,8 +11,11 @@ import com.nicele08.notifyme.repository.ClientRepository;
 @Service
 public class ClientService {
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
+
+    public ClientService(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+    }
 
     public Client createClient(Client client) {
         return clientRepository.save(client);

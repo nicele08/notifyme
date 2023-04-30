@@ -3,7 +3,6 @@ package com.nicele08.notifyme.controller;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,20 +10,26 @@ import org.springframework.web.bind.annotation.*;
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.service.ClientService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/clients")
+@Tag(name = "Clients", description = "The Clients API")
 public class ClientController {
 
-    @Autowired
-    private ClientService clientService;
+    private final ClientService clientService;
 
-    @PostMapping("/")
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
+    @PostMapping
     public ResponseEntity<Client> createClient(@RequestBody Client client) {
         Client newClient = clientService.createClient(client);
         return ResponseEntity.status(HttpStatus.CREATED).body(newClient);
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Client>> getAllClients() {
         List<Client> clients = clientService.getAllClients();
         return ResponseEntity.ok(clients);
