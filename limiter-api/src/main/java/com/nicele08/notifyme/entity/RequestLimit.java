@@ -1,6 +1,11 @@
 package com.nicele08.notifyme.entity;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.DurationSerializer;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,14 +26,22 @@ public class RequestLimit {
     private Long id;
 
     @Column(nullable = false)
+    @JsonSerialize(using = DurationSerializer.class)
     private Duration timeWindow;
 
     @Column(nullable = false)
     private Integer maxRequests;
 
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
+    @JsonBackReference
     private Client client;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "monthly_request_limit_id")
+    private MonthlyRequestLimit monthlyRequestLimit;
 
     public Long getId() {
         return id;
@@ -60,6 +73,26 @@ public class RequestLimit {
 
     public void setClient(Client client) {
         this.client = client;
-    }    
-}
+    }
 
+    public MonthlyRequestLimit getMonthlyRequestLimit() {
+        return monthlyRequestLimit;
+    }
+
+    public void setMonthlyRequestLimit(MonthlyRequestLimit monthlyRequestLimit) {
+        this.monthlyRequestLimit = monthlyRequestLimit;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setCurrentDateTime() {
+        this.createdAt = LocalDateTime.now();
+    }
+    
+}

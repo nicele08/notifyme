@@ -37,4 +37,16 @@ public class RequestService {
         request.setCreatedAt(currentTime);
         return requestRepository.save(request);
     }
+
+    public int getRequestCountForMonthAndClient(int month, int year, Long clientId) {
+        LocalDateTime startOfMonth = LocalDateTime.of(year, month, 1, 0, 0);
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
+
+        return requestRepository.countByCreatedAtBetweenAndClientId(clientId, startOfMonth, endOfMonth);
+    }
+
+    public int getRequestCountWithinTimeWindowAndClient(LocalDateTime fromDateTime, LocalDateTime toDateTime,
+            Long clientId) {
+        return requestRepository.countByCreatedAtBetweenAndClientId(clientId, fromDateTime, toDateTime);
+    }
 }

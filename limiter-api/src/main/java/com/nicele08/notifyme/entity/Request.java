@@ -1,7 +1,8 @@
 package com.nicele08.notifyme.entity;
 
-import java.net.Authenticator.RequestorType;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +33,7 @@ public class Request {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
+    @JsonBackReference
     private Client client;
 
     public Long getId() {
@@ -64,5 +66,9 @@ public class Request {
 
     public void setClient(Client client) {
         this.client = client;
-    }    
+    }
+    
+    public void setCurrentDateTime() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
