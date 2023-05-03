@@ -3,7 +3,7 @@ import responses from '../responses/default';
 const emails = {
   '/api/emails': {
     post: {
-      tags: ['emails'],
+      tags: ['Emails'],
       security: [
         {
           JWT: [],

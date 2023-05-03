@@ -1,11 +1,13 @@
 import defaultPaths from './default/default.paths';
 import emails from './emails/emails';
+import auth from './users/auth';
 import users from './users/users';
 
 const paths = {
   ...defaultPaths,
   ...users,
   ...emails,
+  ...auth,
 };
 
 const appDocs = {
