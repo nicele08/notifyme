@@ -22,7 +22,7 @@ public class MonthlyRequestLimitService {
     }
 
     public Optional<MonthlyRequestLimit> findByClientIdAndMonth(Long clientId, LocalDate month) {
-        return monthlyRequestLimitRepository.findByClientIdAndMonth(clientId, month);
+        return monthlyRequestLimitRepository.findByClientIdAndMonth(clientId, month.getMonthValue());
     }
 
     public Optional<MonthlyRequestLimit> findByIdAndClientId(Long id, Long clientId) {

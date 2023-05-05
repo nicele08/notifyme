@@ -1,7 +1,5 @@
 package com.nicele08.notifyme.repository;
 
-import com.nicele08.notifyme.entity.Client;
-import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.entity.RequestLimit;
 
 import java.util.List;
@@ -12,5 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface RequestLimitRepository extends JpaRepository<RequestLimit, Long> {
     List<RequestLimit> findByClientId(Long clientId);
 
-    Optional<RequestLimit> findByClientAndMonthlyRequestLimit(Client client, MonthlyRequestLimit monthlyRequestLimit);
+    Optional<RequestLimit> findByClient_IdAndMonthlyRequestLimit_Month(Long clientId, int month);
 }

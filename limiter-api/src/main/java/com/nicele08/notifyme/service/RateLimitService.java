@@ -52,27 +52,19 @@ public class RateLimitService {
         return requestsWithinTimeWindow >= requestLimit.getMaxRequests();
     }
 
-    public Optional<MonthlyRequestLimit> getMonthlyRequestLimit(Client client) {
-        LocalDate now = LocalDate.now();
-        return monthlyRequestLimitService.findByClientIdAndMonth(client.getId(), now);
-    }
-
     public RequestLimit findOrCreateRequestLimit(Client client) {
-        Optional<MonthlyRequestLimit> optionalMonthlyRequestLimit = this.getMonthlyRequestLimit(client);
-        if (optionalMonthlyRequestLimit.isPresent()) {
-            MonthlyRequestLimit monthlyRequestLimit = optionalMonthlyRequestLimit.get();
-            Optional<RequestLimit> optionalRequestLimit = requestLimitService
-                    .findByClientIdAndMonthlyRequestLimit(client, monthlyRequestLimit);
+        LocalDate now = LocalDate.now();
+        Optional<RequestLimit> optionalRequestLimit = requestLimitService
+                .findByClientIdAndMonthlyRequestLimitMonth(client.getId(), now.getMonthValue());
 
-            if (optionalRequestLimit.isPresent()) {
-                return optionalRequestLimit.get();
-            }
+        if (optionalRequestLimit.isPresent()) {
+            return optionalRequestLimit.get();
         }
 
         MonthlyRequestLimit newMonthlyRequestLimit = new MonthlyRequestLimit();
         newMonthlyRequestLimit.setClient(client);
         newMonthlyRequestLimit.setMaxRequests(1000);
-        newMonthlyRequestLimit.setMonth(LocalDate.now());
+        newMonthlyRequestLimit.setMonth(LocalDate.now().getMonthValue());
 
         RequestLimit requestLimit = new RequestLimit();
         requestLimit.setClient(client);

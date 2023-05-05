@@ -59,7 +59,8 @@ public class MonthlyRequestLimitController {
             @RequestBody @Valid MonthlyRequestLimitRequestBody monthlyRequestLimitRequestBody) {
         Long clientId = monthlyRequestLimitRequestBody.getClientId();
         LocalDate month = LocalDate.now();
-        Optional<MonthlyRequestLimit> presentMonthlyLimit = monthlyRequestLimitService.findByClientIdAndMonth(clientId, month);
+        Optional<MonthlyRequestLimit> presentMonthlyLimit = monthlyRequestLimitService.findByClientIdAndMonth(clientId,
+                month);
         if (presentMonthlyLimit.isPresent()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -68,7 +69,7 @@ public class MonthlyRequestLimitController {
             Client client = optionalClient.get();
             MonthlyRequestLimit monthlyLimit = new MonthlyRequestLimit();
             monthlyLimit.setMaxRequests(monthlyRequestLimitRequestBody.getMaxRequests());
-            monthlyLimit.setMonth(month);
+            monthlyLimit.setMonth(month.getMonthValue());
             monthlyLimit.setClient(client);
             MonthlyRequestLimit createdMonthlyLimit = monthlyRequestLimitService.save(monthlyLimit);
             return new ResponseEntity<>(createdMonthlyLimit, HttpStatus.CREATED);

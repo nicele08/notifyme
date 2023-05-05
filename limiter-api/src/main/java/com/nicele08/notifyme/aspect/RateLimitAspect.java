@@ -74,38 +74,37 @@ public class RateLimitAspect {
             throw new RateLimitExceededException("Monthly Rate limit exceeded for client API key: " + apiKey);
         }
 
-        // Check if the client is window rate limited
-        if (rateLimitService.isRateWindowLimited(requestLimit)) {
-            throw new RateLimitExceededException("Window time Rate limit exceeded for client API key: " + apiKey);
-        }
+        String windowKey = "rate_window_limit:" + apiKey;
 
-        String key = "rate_limit:" + apiKey;
+        Integer requestWindowCount = 0;
 
-        Integer requestCount = 0;
-
-        String requestCountStr = redisTemplate.opsForValue().get(key);
-        if (requestCountStr != null) {
-            requestCount = Integer.parseInt(requestCountStr);
-            System.out.println("Rate limit value: " + requestCount);
+        String requestWindowCountStr = redisTemplate.opsForValue().get(windowKey);
+        if (requestWindowCountStr != null) {
+            requestWindowCount = Integer.parseInt(requestWindowCountStr);
+            System.out.println("Rate limit value: " + requestWindowCount);
         } else {
-            System.out.println("Rate limit value not found for key: " + key);
+            System.out.println("Rate limit value not found for window Key: " + windowKey);
+            // Check if the client is window rate limited
+            if (rateLimitService.isRateWindowLimited(requestLimit)) {
+                throw new RateLimitExceededException("Window time Rate limit exceeded for client API key: " + apiKey);
+            }
         }
 
         int maxRequests = requestLimit.getMaxRequests();
         long windowSeconds = requestLimit.getTimeWindow().toSeconds();
 
-        if (requestCount >= maxRequests) {
+        if (requestWindowCount >= maxRequests) {
             throw new RateLimitExceededException("Rate limit exceeded for client API key: " + apiKey);
         }
 
-        redisTemplate.opsForValue().set(key, String.valueOf(requestCount + 1), windowSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(windowKey, String.valueOf(requestWindowCount + 1), windowSeconds, TimeUnit.SECONDS);
 
         Object result;
 
         try {
             result = joinPoint.proceed();
         } catch (Exception e) {
-            redisTemplate.opsForValue().increment(key, -1);
+            redisTemplate.opsForValue().increment(windowKey, -1);
             throw e;
         }
 

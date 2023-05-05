@@ -1,7 +1,5 @@
 package com.nicele08.notifyme.service;
 
-import com.nicele08.notifyme.entity.Client;
-import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.repository.RequestLimitRepository;
 import org.springframework.stereotype.Service;
@@ -21,9 +19,9 @@ public class RequestLimitService {
         return requestLimitRepository.findById(id);
     }
 
-    public Optional<RequestLimit> findByClientIdAndMonthlyRequestLimit(Client client,
-            MonthlyRequestLimit monthlyRequestLimit) {
-        return requestLimitRepository.findByClientAndMonthlyRequestLimit(client, monthlyRequestLimit);
+    public Optional<RequestLimit> findByClientIdAndMonthlyRequestLimitMonth(Long clientId,
+            int month) {
+        return requestLimitRepository.findByClient_IdAndMonthlyRequestLimit_Month(clientId, month);
     }
 
     public RequestLimit saveRequestLimit(RequestLimit requestLimit) {

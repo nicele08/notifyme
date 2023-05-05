@@ -1,12 +1,9 @@
 package com.nicele08.notifyme.entity;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,9 +28,8 @@ public class MonthlyRequestLimit {
     @Column(nullable = false)
     private Integer maxRequests;
 
-    @Column(nullable = false)
-    @JsonSerialize(using = LocalDateSerializer.class)
-    private LocalDate month;
+    @Column(nullable = false, unique = true)
+    private int month;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
@@ -59,11 +55,11 @@ public class MonthlyRequestLimit {
         this.maxRequests = maxRequests;
     }
 
-    public LocalDate getMonth() {
+    public int getMonth() {
         return month;
     }
 
-    public void setMonth(LocalDate month) {
+    public void setMonth(int month) {
         this.month = month;
     }
 
