@@ -1,6 +1,7 @@
 package com.nicele08.notifyme.aspect;
 
 import java.lang.reflect.Method;
+import java.time.YearMonth;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.entity.RequestLimit;
-import com.nicele08.notifyme.exception.RateLimitExceededException;
+import com.nicele08.notifyme.exception.TooManyRequestsException;
 import com.nicele08.notifyme.repository.ClientRepository;
 import com.nicele08.notifyme.service.RateLimitService;
 
@@ -69,10 +70,33 @@ public class RateLimitAspect {
 
         RequestLimit requestLimit = rateLimitService.findOrCreateRequestLimit(client);
 
-        // Check if the client is monthly rate limited
-        if (rateLimitService.isRateMonthlyLimited(requestLimit)) {
-            throw new RateLimitExceededException("Monthly Rate limit exceeded for client API key: " + apiKey);
+        String monthlyKey = "rate_monthly_limit:" + apiKey;
+
+        Integer requestMonthlyCount = 0;
+
+        String requestMonthlyCountStr = redisTemplate.opsForValue().get(monthlyKey);
+        if (requestMonthlyCountStr != null) {
+            requestMonthlyCount = Integer.parseInt(requestMonthlyCountStr);
+            System.out.println("Rate limit value: " + requestMonthlyCount);
+        } else {
+            System.out.println("Rate limit value not found for window Key: " + monthlyKey);
+            // Reset the monthly count
+            requestMonthlyCount = rateLimitService.totalMonthlyRequests(requestLimit);
         }
+
+        int maxMonthlyRequests = requestLimit.getMonthlyRequestLimit().getMaxRequests();
+        int year = YearMonth.now().getYear();
+        int month = YearMonth.now().getMonthValue();
+        YearMonth yearMonthObject = YearMonth.of(year, month);
+        int daysInMonth = yearMonthObject.lengthOfMonth();
+
+        // Check if the client is monthly rate limited
+        if (requestMonthlyCount >= maxMonthlyRequests) {
+            throw new TooManyRequestsException("Monthly Time Rate limit exceeded for client API key: " + apiKey);
+        }
+
+        redisTemplate.opsForValue().set(monthlyKey, String.valueOf(requestMonthlyCount + 1), daysInMonth, TimeUnit.DAYS);
+
 
         String windowKey = "rate_window_limit:" + apiKey;
 
@@ -84,17 +108,15 @@ public class RateLimitAspect {
             System.out.println("Rate limit value: " + requestWindowCount);
         } else {
             System.out.println("Rate limit value not found for window Key: " + windowKey);
-            // Check if the client is window rate limited
-            if (rateLimitService.isRateWindowLimited(requestLimit)) {
-                throw new RateLimitExceededException("Window time Rate limit exceeded for client API key: " + apiKey);
-            }
+            // Reset the window count
+            requestWindowCount = rateLimitService.countRequestsWithinTimeWindow(requestLimit);
         }
 
         int maxRequests = requestLimit.getMaxRequests();
         long windowSeconds = requestLimit.getTimeWindow().toSeconds();
 
         if (requestWindowCount >= maxRequests) {
-            throw new RateLimitExceededException("Rate limit exceeded for client API key: " + apiKey);
+            throw new TooManyRequestsException("Window Time Rate limit exceeded for client API key: " + apiKey);
         }
 
         redisTemplate.opsForValue().set(windowKey, String.valueOf(requestWindowCount + 1), windowSeconds, TimeUnit.SECONDS);
@@ -105,6 +127,7 @@ public class RateLimitAspect {
             result = joinPoint.proceed();
         } catch (Exception e) {
             redisTemplate.opsForValue().increment(windowKey, -1);
+            redisTemplate.opsForValue().increment(monthlyKey, -1);
             throw e;
         }
 

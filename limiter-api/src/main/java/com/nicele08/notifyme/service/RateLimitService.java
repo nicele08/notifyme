@@ -25,7 +25,7 @@ public class RateLimitService {
         this.requestLimitService = requestLimitService;
     }
 
-    public boolean isRateMonthlyLimited(RequestLimit requestLimit) {
+    public int totalMonthlyRequests(RequestLimit requestLimit) {
         LocalDate now = LocalDate.now();
 
         // Check if the total number of requests in the current month exceeds the
@@ -33,14 +33,10 @@ public class RateLimitService {
         int totalRequests = requestService.getRequestCountForMonthAndClient(now.getMonthValue(),
                 now.getYear(), requestLimit.getClient().getId());
 
-        if (totalRequests >= requestLimit.getMonthlyRequestLimit().getMaxRequests()) {
-            return true;
-        }
-
-        return false;
+        return totalRequests;
     }
 
-    public boolean isRateWindowLimited(RequestLimit requestLimit) {
+    public int countRequestsWithinTimeWindow(RequestLimit requestLimit) {
         LocalDateTime now = LocalDateTime.now();
 
         // Check if the total number of requests within the time window exceeds the
@@ -49,7 +45,7 @@ public class RateLimitService {
                 now.minus(requestLimit.getTimeWindow()), now,
                 requestLimit.getClient().getId());
 
-        return requestsWithinTimeWindow >= requestLimit.getMaxRequests();
+        return requestsWithinTimeWindow;
     }
 
     public RequestLimit findOrCreateRequestLimit(Client client) {
