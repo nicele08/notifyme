@@ -3,6 +3,7 @@ package com.nicele08.notifyme.controller;
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.entity.RequestLimit;
+import com.nicele08.notifyme.exception.NotFoundException;
 import com.nicele08.notifyme.model.RequestLimitBody;
 import com.nicele08.notifyme.service.ClientService;
 import com.nicele08.notifyme.service.MonthlyRequestLimitService;
@@ -64,7 +65,7 @@ public class RequestLimitController {
             RequestLimit createdRequestLimit = requestLimitService.saveRequestLimit(requestLimit);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRequestLimit);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Client or monthly request limit not found with id " + clientId);
         }
 
     }
@@ -97,7 +98,7 @@ public class RequestLimitController {
                 return ResponseEntity.notFound().build();
             }
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Request limit not found with id " + id);
         }
     }
 
@@ -111,7 +112,7 @@ public class RequestLimitController {
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new NotFoundException("Request limit not found with id " + id);
         }
     }
 

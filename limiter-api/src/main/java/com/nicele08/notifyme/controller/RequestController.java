@@ -3,6 +3,7 @@ package com.nicele08.notifyme.controller;
 import com.nicele08.notifyme.aspect.RateLimited;
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.entity.Request;
+import com.nicele08.notifyme.exception.NotFoundException;
 import com.nicele08.notifyme.model.RequestRequestBody;
 import com.nicele08.notifyme.service.ClientService;
 import com.nicele08.notifyme.service.RequestService;
@@ -51,7 +52,7 @@ public class RequestController {
             Request createdRequest = requestService.createRequest(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRequest);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Client with id " + clientId + " does not exist");
         }
     }
 }

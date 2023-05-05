@@ -2,6 +2,7 @@ package com.nicele08.notifyme.controller;
 
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.entity.MonthlyRequestLimit;
+import com.nicele08.notifyme.exception.ConflictException;
 import com.nicele08.notifyme.model.MonthlyRequestLimitRequestBody;
 import com.nicele08.notifyme.service.ClientService;
 import com.nicele08.notifyme.service.MonthlyRequestLimitService;
@@ -39,20 +40,6 @@ public class MonthlyRequestLimitController {
         return new ResponseEntity<>(monthlyLimits, HttpStatus.OK);
     }
 
-    @GetMapping("/{clientId}/{month}")
-    @Operation(summary = "Get monthly limit by client id and month")
-    public ResponseEntity<MonthlyRequestLimit> getMonthlyLimitByClientIdAndMonth(
-            @PathVariable Long clientId,
-            @PathVariable String month) {
-
-        LocalDate date = LocalDate.parse(month);
-        Optional<MonthlyRequestLimit> monthlyLimit = monthlyRequestLimitService.findByClientIdAndMonth(clientId, date);
-
-        return monthlyLimit
-                .map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
     @PostMapping
     @Operation(summary = "Create monthly limit")
     public ResponseEntity<MonthlyRequestLimit> createMonthlyLimit(
@@ -62,7 +49,8 @@ public class MonthlyRequestLimitController {
         Optional<MonthlyRequestLimit> presentMonthlyLimit = monthlyRequestLimitService.findByClientIdAndMonth(clientId,
                 month);
         if (presentMonthlyLimit.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            throw new ConflictException("Monthly limit for client " + clientId + " and month " + month
+                    + " already exists");
         }
         Optional<Client> optionalClient = clientService.getClientById(clientId);
         if (optionalClient.isPresent()) {

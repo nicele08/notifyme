@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.nicele08.notifyme.entity.Client;
+import com.nicele08.notifyme.exception.NotFoundException;
 import com.nicele08.notifyme.model.ClientRequestBody;
 import com.nicele08.notifyme.service.ClientService;
 
@@ -52,7 +53,7 @@ public class ClientController {
             Client client = optionalClient.get();
             return ResponseEntity.ok(client);
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Client with id " + id + " does not exist");
         }
     }
 
@@ -68,7 +69,7 @@ public class ClientController {
     public ResponseEntity<Client> updateClient(@PathVariable Long id,
             @RequestBody @Valid ClientRequestBody clientRequestBody) {
         if (!clientService.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Client with id " + id + " does not exist");
         }
         Client client = new Client();
         client.setName(clientRequestBody.getName());

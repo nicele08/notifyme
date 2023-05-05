@@ -17,6 +17,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.nicele08.notifyme.entity.Client;
 import com.nicele08.notifyme.entity.RequestLimit;
+import com.nicele08.notifyme.exception.BadRequest;
+import com.nicele08.notifyme.exception.NotFoundException;
 import com.nicele08.notifyme.exception.TooManyRequestsException;
 import com.nicele08.notifyme.repository.ClientRepository;
 import com.nicele08.notifyme.service.RateLimitService;
@@ -56,14 +58,14 @@ public class RateLimitAspect {
         System.out.println(apiKeyArgName + ": " + apiKey);
 
         if (StringUtils.isEmpty(apiKey)) {
-            throw new IllegalArgumentException("Missing client API Key in request body");
+            throw new BadRequest("Missing client API Key in request parameters");
         }
 
         Optional<Client> optionalClient = clientRepository.findByApiKey(apiKey);
 
         // Check if the client exists
         if (!optionalClient.isPresent()) {
-            throw new IllegalArgumentException("Invalid API key");
+            throw new NotFoundException("Invalid API key");
         }
 
         Client client = optionalClient.get();
@@ -77,9 +79,7 @@ public class RateLimitAspect {
         String requestMonthlyCountStr = redisTemplate.opsForValue().get(monthlyKey);
         if (requestMonthlyCountStr != null) {
             requestMonthlyCount = Integer.parseInt(requestMonthlyCountStr);
-            System.out.println("Rate limit value: " + requestMonthlyCount);
         } else {
-            System.out.println("Rate limit value not found for window Key: " + monthlyKey);
             // Reset the monthly count
             requestMonthlyCount = rateLimitService.totalMonthlyRequests(requestLimit);
         }
@@ -105,9 +105,7 @@ public class RateLimitAspect {
         String requestWindowCountStr = redisTemplate.opsForValue().get(windowKey);
         if (requestWindowCountStr != null) {
             requestWindowCount = Integer.parseInt(requestWindowCountStr);
-            System.out.println("Rate limit value: " + requestWindowCount);
         } else {
-            System.out.println("Rate limit value not found for window Key: " + windowKey);
             // Reset the window count
             requestWindowCount = rateLimitService.countRequestsWithinTimeWindow(requestLimit);
         }
