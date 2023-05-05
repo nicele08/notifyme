@@ -12,4 +12,6 @@ public interface MonthlyRequestLimitRepository extends JpaRepository<MonthlyRequ
     List<MonthlyRequestLimit> findByClientId(Long clientId);
 
     Optional<MonthlyRequestLimit> findByClientIdAndMonth(Long clientId, LocalDate month);
+
+    Optional<MonthlyRequestLimit> findByIdAndClientId(Long id, Long clientId);
 }

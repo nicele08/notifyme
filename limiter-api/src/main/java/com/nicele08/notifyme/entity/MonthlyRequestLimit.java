@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,6 +32,7 @@ public class MonthlyRequestLimit {
     private Integer maxRequests;
 
     @Column(nullable = false)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate month;
 
     @ManyToOne(fetch = FetchType.LAZY)

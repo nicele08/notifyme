@@ -3,7 +3,6 @@ package com.nicele08.notifyme.service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -16,50 +15,74 @@ import com.nicele08.notifyme.entity.RequestLimit;
 public class RateLimitService {
 
     private final RequestService requestService;
+    private final MonthlyRequestLimitService monthlyRequestLimitService;
+    private final RequestLimitService requestLimitService;
 
-    public RateLimitService(RequestService requestService) {
+    public RateLimitService(RequestService requestService, MonthlyRequestLimitService monthlyRequestLimitService,
+            RequestLimitService requestLimitService) {
         this.requestService = requestService;
+        this.monthlyRequestLimitService = monthlyRequestLimitService;
+        this.requestLimitService = requestLimitService;
     }
 
-    public boolean isRateLimited(Client client) {
+    public boolean isRateMonthlyLimited(RequestLimit requestLimit) {
         LocalDate now = LocalDate.now();
 
-        // Get the current monthly request limit for the client
-        Optional<MonthlyRequestLimit> optionalMonthlyRequestLimit = client.getMonthlyRequestLimits().stream()
-                .filter(m -> m.getMonth().getMonth() == now.getMonth() && m.getMonth().getYear() == now.getYear())
-                .findFirst();
+        // Check if the total number of requests in the current month exceeds the
+        // monthly request limit
+        int totalRequests = requestService.getRequestCountForMonthAndClient(now.getMonthValue(),
+                now.getYear(), requestLimit.getClient().getId());
 
-        if (optionalMonthlyRequestLimit.isPresent()) {
-            MonthlyRequestLimit monthlyRequestLimit = optionalMonthlyRequestLimit.get();
-
-            // Check if the total number of requests in the current month exceeds the
-            // monthly request limit
-            int totalRequests = requestService.getRequestCountForMonthAndClient(now.getMonthValue(),
-                    now.getYear(), client.getId());
-
-            if (totalRequests >= monthlyRequestLimit.getMaxRequests()) {
-                return true;
-            }
-
-            // Check if the client has any request limits that apply to the current time
-            LocalDateTime fromDateTime = LocalDateTime.now().minus(monthlyRequestLimit.getMonth().lengthOfMonth(),
-                    ChronoUnit.DAYS);
-
-            Optional<RequestLimit> optionalRequestLimit = client.getRequestLimits().stream()
-                    .filter(rl -> rl.getTimeWindow().compareTo(Duration.between(fromDateTime, LocalDateTime.now())) >= 0)
-                    .findFirst();
-
-            if (optionalRequestLimit.isPresent()) {
-                RequestLimit requestLimit = optionalRequestLimit.get();
-
-                // Check if the total number of requests within the time window exceeds the request limit
-                int requestsWithinTimeWindow = requestService.getRequestCountWithinTimeWindowAndClient(
-                        LocalDateTime.now().minus(requestLimit.getTimeWindow()), LocalDateTime.now(), client.getId());
-
-                return requestsWithinTimeWindow >= requestLimit.getMaxRequests();
-            }
+        if (totalRequests >= requestLimit.getMonthlyRequestLimit().getMaxRequests()) {
+            return true;
         }
 
         return false;
     }
+
+    public boolean isRateWindowLimited(RequestLimit requestLimit) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if the total number of requests within the time window exceeds the
+        // request limit
+        int requestsWithinTimeWindow = requestService.getRequestCountWithinTimeWindowAndClient(
+                now.minus(requestLimit.getTimeWindow()), now,
+                requestLimit.getClient().getId());
+
+        return requestsWithinTimeWindow >= requestLimit.getMaxRequests();
+    }
+
+    public Optional<MonthlyRequestLimit> getMonthlyRequestLimit(Client client) {
+        LocalDate now = LocalDate.now();
+        return monthlyRequestLimitService.findByClientIdAndMonth(client.getId(), now);
+    }
+
+    public RequestLimit findOrCreateRequestLimit(Client client) {
+        Optional<MonthlyRequestLimit> optionalMonthlyRequestLimit = this.getMonthlyRequestLimit(client);
+        if (optionalMonthlyRequestLimit.isPresent()) {
+            MonthlyRequestLimit monthlyRequestLimit = optionalMonthlyRequestLimit.get();
+            Optional<RequestLimit> optionalRequestLimit = requestLimitService
+                    .findByClientIdAndMonthlyRequestLimit(client, monthlyRequestLimit);
+
+            if (optionalRequestLimit.isPresent()) {
+                return optionalRequestLimit.get();
+            }
+        }
+
+        MonthlyRequestLimit newMonthlyRequestLimit = new MonthlyRequestLimit();
+        newMonthlyRequestLimit.setClient(client);
+        newMonthlyRequestLimit.setMaxRequests(1000);
+        newMonthlyRequestLimit.setMonth(LocalDate.now());
+
+        RequestLimit requestLimit = new RequestLimit();
+        requestLimit.setClient(client);
+        requestLimit.setMaxRequests(100);
+        requestLimit.setTimeWindow(Duration.ofHours(1));
+        requestLimit.setCurrentDateTime();
+        requestLimit.setMonthlyRequestLimit(monthlyRequestLimitService.save(newMonthlyRequestLimit));
+
+        return requestLimitService.save(requestLimit);
+
+    }
+
 }

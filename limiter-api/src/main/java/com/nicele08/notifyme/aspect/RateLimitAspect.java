@@ -8,7 +8,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.nicele08.notifyme.entity.Client;
+import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.exception.RateLimitExceededException;
 import com.nicele08.notifyme.repository.ClientRepository;
 import com.nicele08.notifyme.service.RateLimitService;
@@ -28,12 +28,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @Order(1)
 public class RateLimitAspect {
 
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final ClientRepository clientRepository;
     private final RateLimitService rateLimitService;
 
-    @Autowired
-    public RateLimitAspect(RedisTemplate<String, Integer> redisTemplate, ClientRepository clientRepository,
+    public RateLimitAspect(RedisTemplate<String, String> redisTemplate, ClientRepository clientRepository,
             RateLimitService rateLimitService) {
         this.redisTemplate = redisTemplate;
         this.clientRepository = clientRepository;
@@ -68,26 +67,38 @@ public class RateLimitAspect {
 
         Client client = optionalClient.get();
 
-        // Check if the client is rate limited
-        if (rateLimitService.isRateLimited(client)) {
-            throw new RateLimitExceededException("Rate limit exceeded for client API key: " + apiKey);
+        RequestLimit requestLimit = rateLimitService.findOrCreateRequestLimit(client);
+
+        // Check if the client is monthly rate limited
+        if (rateLimitService.isRateMonthlyLimited(requestLimit)) {
+            throw new RateLimitExceededException("Monthly Rate limit exceeded for client API key: " + apiKey);
+        }
+
+        // Check if the client is window rate limited
+        if (rateLimitService.isRateWindowLimited(requestLimit)) {
+            throw new RateLimitExceededException("Window time Rate limit exceeded for client API key: " + apiKey);
         }
 
         String key = "rate_limit:" + apiKey;
-        Integer requestCount = redisTemplate.opsForValue().get(key);
 
-        if (requestCount == null) {
-            requestCount = 0;
+        Integer requestCount = 0;
+
+        String requestCountStr = redisTemplate.opsForValue().get(key);
+        if (requestCountStr != null) {
+            requestCount = Integer.parseInt(requestCountStr);
+            System.out.println("Rate limit value: " + requestCount);
+        } else {
+            System.out.println("Rate limit value not found for key: " + key);
         }
 
-        int maxRequests = client.getRequestLimit().getMaxRequests();
-        long windowSeconds = client.getRequestLimit().getTimeWindow().toSeconds();
+        int maxRequests = requestLimit.getMaxRequests();
+        long windowSeconds = requestLimit.getTimeWindow().toSeconds();
 
         if (requestCount >= maxRequests) {
             throw new RateLimitExceededException("Rate limit exceeded for client API key: " + apiKey);
         }
 
-        redisTemplate.opsForValue().set(key, requestCount + 1, windowSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key, String.valueOf(requestCount + 1), windowSeconds, TimeUnit.SECONDS);
 
         Object result;
 

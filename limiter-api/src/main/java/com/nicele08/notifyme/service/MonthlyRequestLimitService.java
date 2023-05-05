@@ -25,6 +25,10 @@ public class MonthlyRequestLimitService {
         return monthlyRequestLimitRepository.findByClientIdAndMonth(clientId, month);
     }
 
+    public Optional<MonthlyRequestLimit> findByIdAndClientId(Long id, Long clientId) {
+        return monthlyRequestLimitRepository.findByIdAndClientId(id, clientId);
+    }
+
     public MonthlyRequestLimit save(MonthlyRequestLimit monthlyRequestLimit) {
         return monthlyRequestLimitRepository.save(monthlyRequestLimit);
     }

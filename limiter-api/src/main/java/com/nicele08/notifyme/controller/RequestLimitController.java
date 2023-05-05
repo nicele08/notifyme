@@ -1,9 +1,11 @@
 package com.nicele08.notifyme.controller;
 
 import com.nicele08.notifyme.entity.Client;
+import com.nicele08.notifyme.entity.MonthlyRequestLimit;
 import com.nicele08.notifyme.entity.RequestLimit;
 import com.nicele08.notifyme.model.RequestLimitBody;
 import com.nicele08.notifyme.service.ClientService;
+import com.nicele08.notifyme.service.MonthlyRequestLimitService;
 import com.nicele08.notifyme.service.RequestLimitService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,10 +25,13 @@ public class RequestLimitController {
 
     private final RequestLimitService requestLimitService;
     private final ClientService clientService;
+    private final MonthlyRequestLimitService monthlyRequestLimitService;
 
-    public RequestLimitController(RequestLimitService requestLimitService, ClientService clientService) {
+    public RequestLimitController(RequestLimitService requestLimitService, ClientService clientService,
+            MonthlyRequestLimitService monthlyRequestLimitService) {
         this.requestLimitService = requestLimitService;
         this.clientService = clientService;
+        this.monthlyRequestLimitService = monthlyRequestLimitService;
     }
 
     @GetMapping("/{id}")
@@ -43,12 +48,18 @@ public class RequestLimitController {
     public ResponseEntity<RequestLimit> createRequestLimit(@RequestBody @Valid RequestLimitBody requestLimitBody) {
         Long clientId = requestLimitBody.getClientId();
         Optional<Client> optionalClient = clientService.getClientById(clientId);
-        if (optionalClient.isPresent()) {
+
+        Long monthlyRequestLimitId = requestLimitBody.getMonthlyRequestLimitId();
+        Optional<MonthlyRequestLimit> optionalMonthlyRequestLimit = monthlyRequestLimitService
+                .findByIdAndClientId(monthlyRequestLimitId, clientId);
+        if (optionalClient.isPresent() && optionalMonthlyRequestLimit.isPresent()) {
             Client client = optionalClient.get();
+            MonthlyRequestLimit monthlyRequestLimit = optionalMonthlyRequestLimit.get();
             RequestLimit requestLimit = new RequestLimit();
             requestLimit.setClient(client);
             requestLimit.setMaxRequests(requestLimitBody.getMaxRequests());
             requestLimit.setTimeWindow(requestLimitBody.getTimeWindow());
+            requestLimit.setMonthlyRequestLimit(monthlyRequestLimit);
             requestLimit.setCurrentDateTime();
             RequestLimit createdRequestLimit = requestLimitService.saveRequestLimit(requestLimit);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRequestLimit);
@@ -67,13 +78,19 @@ public class RequestLimitController {
         if (existingRequestLimit.isPresent()) {
             Long clientId = requestLimitBody.getClientId();
             Optional<Client> optionalClient = clientService.getClientById(clientId);
-            if (optionalClient.isPresent()) {
+
+            Long monthlyRequestLimitId = requestLimitBody.getMonthlyRequestLimitId();
+            Optional<MonthlyRequestLimit> optionalMonthlyRequestLimit = monthlyRequestLimitService
+                    .findByIdAndClientId(monthlyRequestLimitId, clientId);
+            if (optionalClient.isPresent() && optionalMonthlyRequestLimit.isPresent()) {
                 Client client = optionalClient.get();
+                MonthlyRequestLimit monthlyRequestLimit = optionalMonthlyRequestLimit.get();
                 RequestLimit requestLimit = new RequestLimit();
                 requestLimit.setId(id);
                 requestLimit.setClient(client);
                 requestLimit.setMaxRequests(requestLimitBody.getMaxRequests());
                 requestLimit.setTimeWindow(requestLimitBody.getTimeWindow());
+                requestLimit.setMonthlyRequestLimit(monthlyRequestLimit);
                 RequestLimit updatedRequestLimit = requestLimitService.saveRequestLimit(requestLimit);
                 return ResponseEntity.status(HttpStatus.OK).body(updatedRequestLimit);
             } else {

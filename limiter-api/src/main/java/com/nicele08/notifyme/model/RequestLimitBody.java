@@ -22,6 +22,10 @@ public class RequestLimitBody {
     @Schema(example = "1", description = "ID of the client")
     private Long clientId;
 
+    @NotNull(message = "Monthly request limit ID cannot be null")
+    @Schema(example = "1", description = "ID of the monthly request limit")
+    private Long monthlyRequestLimitId;
+
     public Duration getTimeWindow() {
         return timeWindow;
     }
@@ -45,4 +49,13 @@ public class RequestLimitBody {
     public void setClientId(Long clientId) {
         this.clientId = clientId;
     }
+
+    public Long getMonthlyRequestLimitId() {
+        return monthlyRequestLimitId;
+    }
+
+    public void setMonthlyRequestLimitId(Long monthlyRequestLimitId) {
+        this.monthlyRequestLimitId = monthlyRequestLimitId;
+    }
+
 }
