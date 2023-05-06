@@ -57,13 +57,6 @@ public class ClientController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a client by id")
-    public ResponseEntity<Void> deleteClientById(@PathVariable Long id) {
-        clientService.deleteClientById(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @PutMapping("/{id}")
     @Operation(summary = "Update a client by id")
     public ResponseEntity<Client> updateClient(@PathVariable Long id,

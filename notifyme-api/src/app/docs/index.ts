@@ -1,5 +1,6 @@
 import defaultPaths from './default/default.paths';
 import emails from './emails/emails';
+import sms from './sms/sms';
 import auth from './users/auth';
 import profile from './users/profile';
 
@@ -8,6 +9,7 @@ const paths = {
   ...auth,
   ...profile,
   ...emails,
+  ...sms,
 };
 
 const appDocs = {

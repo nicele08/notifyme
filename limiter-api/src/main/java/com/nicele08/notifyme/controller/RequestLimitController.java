@@ -101,19 +101,4 @@ public class RequestLimitController {
             throw new NotFoundException("Request limit not found with id " + id);
         }
     }
-
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a request limit")
-    public ResponseEntity<HttpStatus> deleteRequestLimit(@PathVariable Long id) {
-        Optional<RequestLimit> requestLimit = requestLimitService.getRequestLimitById(id);
-
-        if (requestLimit.isPresent()) {
-            requestLimitService.deleteRequestLimit(requestLimit.get());
-
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            throw new NotFoundException("Request limit not found with id " + id);
-        }
-    }
-
 }

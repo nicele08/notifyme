@@ -39,11 +39,15 @@ export default class ProfileController {
       const profileData = profile.toJSON();
 
       limiterAPI.getClient(profileData.apiKey).catch(() => {
-        limiterAPI.createClient({
-          apiKey: profileData.apiKey,
-          email: req.user?.email,
-          name: req.user?.firstName,
-        });
+        limiterAPI
+          .createClient({
+            apiKey: profileData.apiKey,
+            email: req.user?.email,
+            name: req.user?.firstName,
+          })
+          .catch(error => {
+            console.log(error);
+          });
       });
       return res.status(200).json({
         apiKey: profileData.apiKey,
