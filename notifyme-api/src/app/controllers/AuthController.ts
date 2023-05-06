@@ -55,7 +55,9 @@ class AuthController {
         subject,
         html: message,
       };
-      sendEmail(mailOptions);
+      sendEmail(mailOptions).catch(error => {
+        console.log('Error sending email: ', error.message);
+      });
 
       res.status(201).json({
         message: `Dear ${signUpUserData.firstName}, check your email to verify your account`,
@@ -197,7 +199,9 @@ class AuthController {
         subject,
         html: message,
       };
-      sendEmail(mailOptions);
+      sendEmail(mailOptions).catch(error => {
+        console.log('Error sending email: ', error.message);
+      });
       res.status(200).json({
         message: 'check your email',
       });
