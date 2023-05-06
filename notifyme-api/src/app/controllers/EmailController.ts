@@ -9,9 +9,7 @@ export default class EmailController {
       
       const name = fromName || req.user?.firstName;
       const from = fromEmail || req.user?.email;
-
-      console.log(from);
-      console.log(fromName);
+      
       sendEmail({
         from: `${name} 🔔 <${from}>`,
         to: to.join(','),

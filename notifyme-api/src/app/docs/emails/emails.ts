@@ -57,6 +57,7 @@ const emails = {
       responses: {
         200: responses[200],
         401: responses[401],
+        404: responses[404],
         429: responses[429],
       },
     },

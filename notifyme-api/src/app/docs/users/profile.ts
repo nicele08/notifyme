@@ -14,6 +14,7 @@ const profile = {
       responses: {
         200: responses[200],
         401: responses[401],
+        429: responses[429],
       },
     },
   },

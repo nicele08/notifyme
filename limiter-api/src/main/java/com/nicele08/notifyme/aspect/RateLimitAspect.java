@@ -9,6 +9,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 @Order(1)
 public class RateLimitAspect {
+
+    @Value("${max-requests-per-minute:5}")
+    private int maxRequestsPerMinute;
 
     private final RedisTemplate<String, String> redisTemplate;
     private final ClientRepository clientRepository;
@@ -95,8 +99,8 @@ public class RateLimitAspect {
             throw new TooManyRequestsException("Monthly Time Rate limit exceeded for client API key: " + apiKey);
         }
 
-        redisTemplate.opsForValue().set(monthlyKey, String.valueOf(requestMonthlyCount + 1), daysInMonth, TimeUnit.DAYS);
-
+        redisTemplate.opsForValue().set(monthlyKey, String.valueOf(requestMonthlyCount + 1), daysInMonth,
+                TimeUnit.DAYS);
 
         String windowKey = "rate_window_limit:" + apiKey;
 
@@ -117,7 +121,8 @@ public class RateLimitAspect {
             throw new TooManyRequestsException("Window Time Rate limit exceeded for client API key: " + apiKey);
         }
 
-        redisTemplate.opsForValue().set(windowKey, String.valueOf(requestWindowCount + 1), windowSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(windowKey, String.valueOf(requestWindowCount + 1), windowSeconds,
+                TimeUnit.SECONDS);
 
         Object result;
 
@@ -129,6 +134,41 @@ public class RateLimitAspect {
             throw e;
         }
 
+        return result;
+    }
+
+    @Around("execution(* com.nicele08.notifyme.controller.*.*(..))")
+    public Object rateLimit(ProceedingJoinPoint joinPoint) throws Throwable {
+        String methodName = joinPoint.getSignature().getName();
+        String key = "request_limit:" + methodName;
+        long period = 60; // period in seconds
+
+        // get the number of requests made in the current period
+        Integer count = 0;
+        String countStr = redisTemplate.opsForValue().get(key);
+        if (countStr != null) {
+            count = Integer.parseInt(countStr);
+        }
+
+        // if the maximum number of requests has been reached, throw an error response
+        if (count >= maxRequestsPerMinute) {
+            throw new TooManyRequestsException("Maximum limit for requests reached, please try again later after 1 minute");
+        }
+
+        // increment the request count and update the expiration time
+        redisTemplate.opsForValue().increment(key, 1);
+        redisTemplate.expire(key, period, TimeUnit.SECONDS);
+
+        Object result;
+
+        try {
+            result = joinPoint.proceed();
+        } catch (Exception e) {
+            redisTemplate.opsForValue().increment(key, -1);
+            throw e;
+        }
+
+        // proceed with the method execution
         return result;
     }
 }
