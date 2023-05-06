@@ -7,12 +7,49 @@ services:
       - "8080:8080"
     networks:
       - notifyme-network
+    depends_on:
+      - postgres
+      - redis
   notifyme-api:
     build: ./notifyme-api
     ports:
-      - "3030:3030"
+      - "3000:3000"
     networks:
       - notifyme-network
+    depends_on:
+      - postgres
+    command:
+      - /bin/sh
+      - -c
+      - |
+        yarn db:create
+        yarn db:migrate
+        yarn start
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - notifyme-network
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - notifyme-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
 
 networks:
   notifyme-network:
