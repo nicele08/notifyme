@@ -69,6 +69,7 @@ Notifyme-API is an Express.js project that provides a notification service API. 
 
 The following environment variables should be set and can be found in the `.env.example` file inside the `notifyme-api` project directory:
 
+- `LIMITER_API`: The URL for the Limiter-API.
 - `DATABASE_URL`: The URL for the PostgreSQL database.
 - `JWT_SECRET`: The secret key for JWT.
 - `EMAIL_HOST`: The host for the email server.
