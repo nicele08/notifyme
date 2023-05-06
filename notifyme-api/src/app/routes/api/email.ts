@@ -15,4 +15,10 @@ emailRouter.post(
   EmailController.send,
 );
 
+emailRouter.get(
+  '/notifications',
+  authenticate,
+  EmailController.getNotifications,
+);
+
 export default emailRouter;

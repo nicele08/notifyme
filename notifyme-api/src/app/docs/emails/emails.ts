@@ -23,12 +23,14 @@ const emails = {
               fromName: {
                 type: 'string',
                 example: '',
-                description: 'Name to send from (Optional if user is logged in)',
+                description:
+                  'Name to send from (Optional if user is logged in)',
               },
               fromEmail: {
                 type: 'string',
                 example: '',
-                description: 'Email address to send from (Optional if user is logged in)',
+                description:
+                  'Email address to send from (Optional if user is logged in)',
               },
               to: {
                 type: 'array',
@@ -59,6 +61,25 @@ const emails = {
         401: responses[401],
         404: responses[404],
         429: responses[429],
+      },
+    },
+  },
+
+  '/api/emails/notifications': {
+    get: {
+      tags: ['Notifications'],
+      security: [
+        {
+          JWT: [],
+        },
+      ],
+      summary: 'Get email notifications',
+      description: 'Get email notifications for the logged in user',
+      consumes: ['application/json'],
+
+      responses: {
+        200: responses[200],
+        401: responses[401],
       },
     },
   },

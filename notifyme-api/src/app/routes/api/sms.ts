@@ -15,4 +15,10 @@ smsRouter.post(
   SMSController.send,
 );
 
+smsRouter.get(
+  '/notifications',
+  authenticate,
+  SMSController.getNotifications,
+);
+
 export default smsRouter;

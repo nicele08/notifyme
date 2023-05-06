@@ -28,7 +28,7 @@ const sms = {
               },
               to: {
                 type: 'string',
-                example: '',
+                example: '250...',
                 required: true,
                 description: 'Phone number to send to',
               },
@@ -47,6 +47,25 @@ const sms = {
         401: responses[401],
         404: responses[404],
         429: responses[429],
+      },
+    },
+  },
+
+  '/api/sms/notifications': {
+    get: {
+      tags: ['Notifications'],
+      security: [
+        {
+          JWT: [],
+        },
+      ],
+      summary: 'Get sms notifications',
+      description: 'Get sms notifications for the logged in user',
+      consumes: ['application/json'],
+
+      responses: {
+        200: responses[200],
+        401: responses[401],
       },
     },
   },

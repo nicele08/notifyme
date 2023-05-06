@@ -10,6 +10,7 @@ const profile = {
         },
       ],
       summary: 'Get API Key',
+      description: 'Get API Key for the logged in user',
       consumes: ['application/json'],
       responses: {
         200: responses[200],
