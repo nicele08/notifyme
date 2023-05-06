@@ -11,24 +11,12 @@ public class RequestRequestBody {
     @Schema(example = "CLIENT", description = "Type of the requestor")
     private RequestorType type;
 
-    @NotNull(message = "clientId cannot be null")
-    @Schema(example = "1", description = "ID of the client")
-    private Long clientId;
-
     public RequestorType getType() {
         return type;
     }
 
     public void setType(RequestorType type) {
         this.type = type;
-    }
-
-    public Long getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
     }
 
 }

@@ -41,8 +41,7 @@ public class RequestController {
     @RateLimited(apiKeyArgName = "apiKey")
     public ResponseEntity<Request> createRequest(@RequestParam String apiKey,
             @RequestBody @Valid RequestRequestBody requestBody) {
-        Long clientId = requestBody.getClientId();
-        Optional<Client> optionalClient = clientService.getClientById(clientId);
+        Optional<Client> optionalClient = clientService.findByApiKey(apiKey);
         if (optionalClient.isPresent()) {
             Client client = optionalClient.get();
             Request request = new Request();
@@ -52,7 +51,7 @@ public class RequestController {
             Request createdRequest = requestService.createRequest(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdRequest);
         } else {
-            throw new NotFoundException("Client with id " + clientId + " does not exist");
+            throw new NotFoundException("Client with api key " + apiKey + " does not exist");
         }
     }
 }

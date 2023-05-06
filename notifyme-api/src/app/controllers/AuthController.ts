@@ -98,11 +98,11 @@ class AuthController {
           'Invalid login credentials. Please check your email and password and try again.',
         );
 
-      if (!findUserData.verified)
-        throw new HttpException(
-          400,
-          `This email ${userData.email} was not verified, please check your email and follow instructions.`,
-        );
+      // if (!findUserData.verified)
+      //   throw new HttpException(
+      //     400,
+      //     `This email ${userData.email} was not verified, please check your email and follow instructions.`,
+      //   );
 
       const tokenData = AuthController.createToken(
         findUserData.id,

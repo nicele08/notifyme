@@ -16,9 +16,11 @@ const auth = {
             properties: {
               email: {
                 type: 'string',
+                example: '',
               },
               password: {
                 type: 'string',
+                example: '',
               },
             },
           },
@@ -46,15 +48,19 @@ const auth = {
             properties: {
               firstName: {
                 type: 'string',
+                example: '',
               },
               lastName: {
                 type: 'string',
+                example: '',
               },
               email: {
                 type: 'string',
+                example: '',
               },
               password: {
                 type: 'string',
+                example: '',
               },
             },
           },
@@ -98,6 +104,7 @@ const auth = {
             properties: {
               email: {
                 type: 'string',
+                example: '',
               },
             },
           },
@@ -124,9 +131,11 @@ const auth = {
             properties: {
               password: {
                 type: 'string',
+                example: '',
               },
               token: {
                 type: 'string',
+                example: '',
               },
             },
           },

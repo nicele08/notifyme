@@ -29,6 +29,10 @@ public class ClientService {
         return clientRepository.findById(id);
     }
 
+    public Optional<Client> findByApiKey(String apiKey) {
+        return clientRepository.findByApiKey(apiKey);
+    }
+
     public void deleteClientById(Long id) {
         clientRepository.deleteById(id);
     }

@@ -17,8 +17,8 @@ export default class LimiterAPI {
     return response.data;
   };
 
-  public getClient = async (id: string) => {
-    const response = await this.axios.get(`/api/clients/${id}`);
+  public getClient = async (apiKey: string) => {
+    const response = await this.axios.get(`/api/clients/${apiKey}`);
     return response.data;
   };
 
@@ -67,7 +67,11 @@ export default class LimiterAPI {
 
   // Manage Requests
   public createRequest = async (data: any) => {
-    const response = await this.axios.post('/api/requests', data);
+    const { apiKey, ...rest } = data;
+    const response = await this.axios.post(
+      `/api/requests?apiKey=${apiKey}`,
+      rest,
+    );
     return response.data;
   };
 

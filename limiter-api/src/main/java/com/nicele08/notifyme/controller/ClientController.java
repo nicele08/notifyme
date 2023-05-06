@@ -45,15 +45,15 @@ public class ClientController {
         return ResponseEntity.ok(clients);
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get a client by id")
-    public ResponseEntity<Client> getClientById(@PathVariable Long id) {
-        Optional<Client> optionalClient = clientService.getClientById(id);
+    @GetMapping("/{apiKey}")
+    @Operation(summary = "Get a client by api key")
+    public ResponseEntity<Client> getClientById(@PathVariable String apiKey) {
+        Optional<Client> optionalClient = clientService.findByApiKey(apiKey);
         if (optionalClient.isPresent()) {
             Client client = optionalClient.get();
             return ResponseEntity.ok(client);
         } else {
-            throw new NotFoundException("Client with id " + id + " does not exist");
+            throw new NotFoundException("Client with api key " + apiKey + " does not exist");
         }
     }
 

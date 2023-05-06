@@ -32,6 +32,9 @@ const responses = {
   409: {
     description: 'Conflicts',
   },
+  429: {
+    description: 'Too Many Requests',
+  },
   500: {
     description: 'Internal Server Error',
   },

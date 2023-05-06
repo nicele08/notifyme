@@ -43,6 +43,7 @@ public class RequestLimit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "monthly_request_limit_id")
+    @JsonBackReference
     private MonthlyRequestLimit monthlyRequestLimit;
 
     public Long getId() {

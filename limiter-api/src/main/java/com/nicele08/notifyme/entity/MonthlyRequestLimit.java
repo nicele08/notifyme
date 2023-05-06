@@ -1,11 +1,7 @@
 package com.nicele08.notifyme.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 
@@ -28,16 +23,13 @@ public class MonthlyRequestLimit {
     @Column(nullable = false)
     private Integer maxRequests;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private int month;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
     @JsonBackReference
     private Client client;
-
-    @OneToMany(mappedBy = "monthlyRequestLimit", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RequestLimit> requestLimits = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -69,15 +61,5 @@ public class MonthlyRequestLimit {
 
     public void setClient(Client client) {
         this.client = client;
-    }
-
-    public void addRequestLimit(RequestLimit requestLimit) {
-        requestLimits.add(requestLimit);
-        requestLimit.setMonthlyRequestLimit(this);
-    }
-
-    public void removeRequestLimit(RequestLimit requestLimit) {
-        requestLimits.remove(requestLimit);
-        requestLimit.setMonthlyRequestLimit(null);
     }
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.nicele08.notifyme.entity.Client;
@@ -13,6 +14,14 @@ import com.nicele08.notifyme.entity.RequestLimit;
 
 @Service
 public class RateLimitService {
+    @Value("${max-requests-per-time-window:100}")
+    private int maxRequestsPerTimeWindow;
+
+    @Value("${max-requests-per-month:1000}")
+    private int maxRequestsPerMonth;
+
+    @Value("${time-window-in-hours:1}")
+    private int timeWindowInHours;
 
     private final RequestService requestService;
     private final MonthlyRequestLimitService monthlyRequestLimitService;
@@ -57,15 +66,17 @@ public class RateLimitService {
             return optionalRequestLimit.get();
         }
 
+        System.out.println("Properties maxRequestsPerTimeWindow: " + maxRequestsPerTimeWindow);
+
         MonthlyRequestLimit newMonthlyRequestLimit = new MonthlyRequestLimit();
         newMonthlyRequestLimit.setClient(client);
-        newMonthlyRequestLimit.setMaxRequests(1000);
+        newMonthlyRequestLimit.setMaxRequests(maxRequestsPerMonth);
         newMonthlyRequestLimit.setMonth(LocalDate.now().getMonthValue());
 
         RequestLimit requestLimit = new RequestLimit();
         requestLimit.setClient(client);
-        requestLimit.setMaxRequests(100);
-        requestLimit.setTimeWindow(Duration.ofHours(1));
+        requestLimit.setMaxRequests(maxRequestsPerTimeWindow);
+        requestLimit.setTimeWindow(Duration.ofHours(timeWindowInHours));
         requestLimit.setCurrentDateTime();
         requestLimit.setMonthlyRequestLimit(monthlyRequestLimitService.save(newMonthlyRequestLimit));
 
